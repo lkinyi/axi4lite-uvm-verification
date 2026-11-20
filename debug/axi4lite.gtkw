@@ -1,0 +1,42 @@
+[*] AXI4-Lite protocol: unchanged Day 1 test and DUT
+[size] 1400 850
+[timestart] 0
+*-18.000000 0 0 0 0 0
+@28
+tb_protocol_wave.protocol.aclk
+@28
+tb_protocol_wave.protocol.aresetn
+@22
+tb_protocol_wave.protocol.awaddr[31:0]
+@28
+tb_protocol_wave.protocol.awvalid
+@28
+tb_protocol_wave.protocol.awready
+@22
+tb_protocol_wave.protocol.wdata[31:0]
+@22
+tb_protocol_wave.protocol.wstrb[3:0]
+@28
+tb_protocol_wave.protocol.wvalid
+@28
+tb_protocol_wave.protocol.wready
+@22
+tb_protocol_wave.protocol.bresp[1:0]
+@28
+tb_protocol_wave.protocol.bvalid
+@28
+tb_protocol_wave.protocol.bready
+@22
+tb_protocol_wave.protocol.araddr[31:0]
+@28
+tb_protocol_wave.protocol.arvalid
+@28
+tb_protocol_wave.protocol.arready
+@22
+tb_protocol_wave.protocol.rdata[31:0]
+@22
+tb_protocol_wave.protocol.rresp[1:0]
+@28
+tb_protocol_wave.protocol.rvalid
+@28
+tb_protocol_wave.protocol.rready

@@ -1,0 +1,63 @@
+[*] AXI4-Lite UVM memory debug; paths supplied by trace-memory.sh
+[size] 1400 1000
+[timestart] 0
+[sst_width] 240
+[signals_width] 260
+[sst_expanded] 1
+*-20.000000 0 0 0 0 0
+@800200
+-Clock/Reset
+@28
+tb_top.aclk
+tb_top.aresetn
+@1000200
+-Clock/Reset
+@800200
+-Write
+@28
+tb_top.intf.awvalid
+tb_top.intf.awready
+@22
+tb_top.intf.awaddr[31:0]
+@28
+tb_top.intf.wvalid
+tb_top.intf.wready
+@22
+tb_top.intf.wdata[31:0]
+tb_top.intf.wstrb[3:0]
+@28
+tb_top.intf.bvalid
+tb_top.intf.bready
+@22
+tb_top.intf.bresp[1:0]
+@1000200
+-Write
+@800200
+-Read
+@28
+tb_top.intf.arvalid
+tb_top.intf.arready
+@22
+tb_top.intf.araddr[31:0]
+@28
+tb_top.intf.rvalid
+tb_top.intf.rready
+@22
+tb_top.intf.rdata[31:0]
+tb_top.intf.rresp[1:0]
+@1000200
+-Read
+@800200
+-DUT Internal
+@28
+tb_top.dut.aw_hs_q
+tb_top.dut.w_hs_q
+tb_top.dut.do_write
+@1000200
+-DUT Internal
+@800200
+-Memory
+@22
+tb_top.debug_mem4[31:0]
+@1000200
+-Memory

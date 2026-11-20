@@ -6,6 +6,10 @@ class axi4lite_seq_item extends uvm_sequence_item;
 
     typedef enum bit {AXI_READ = 1'b0, AXI_WRITE = 1'b1} dir_e;
 
+    typedef enum bit [1:0] {AW_W_UNKNOWN, AW_FIRST, W_FIRST, SAME_CYCLE} aw_w_order_e;
+    aw_w_order_e aw_w_order = AW_W_UNKNOWN; // monitor observations, not stimulus
+    int unsigned b_stall_cycles = 0;
+
     rand dir_e          dir;
     rand bit [31:0]     addr;
     rand bit [31:0]     data;     // write data (stimulus) / read data (result)
@@ -34,6 +38,8 @@ class axi4lite_seq_item extends uvm_sequence_item;
         `uvm_field_int(data, UVM_ALL_ON)
         `uvm_field_int(strb, UVM_ALL_ON)
         `uvm_field_int(resp, UVM_ALL_ON)
+        `uvm_field_enum(aw_w_order_e, aw_w_order, UVM_ALL_ON)
+        `uvm_field_int(b_stall_cycles, UVM_ALL_ON)
     `uvm_object_utils_end
 
     function new(string name = "axi4lite_seq_item");

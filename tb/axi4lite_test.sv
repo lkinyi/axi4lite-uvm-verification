@@ -112,3 +112,48 @@ class axi4lite_ral_test extends axi4lite_base_test;
     endtask
 endclass
 
+
+// Zero-stall acceptance check. The normal driver waits for BVALID before
+// asserting BREADY, so its minimum observed stall is one cycle.
+class axi4lite_zero_stall_test extends axi4lite_base_test;
+    `uvm_component_utils(axi4lite_zero_stall_test)
+    virtual axi4lite_if vif;
+    function new(string name, uvm_component parent); super.new(name, parent); endfunction
+
+    function void build_phase(uvm_phase phase);
+        uvm_config_db#(uvm_active_passive_enum)::set(this, "env.agent", "is_active", UVM_PASSIVE);
+        super.build_phase(phase);
+        if (!uvm_config_db#(virtual axi4lite_if)::get(this, "", "vif", vif))
+            `uvm_fatal("ZERO_STALL", "virtual interface missing")
+    endfunction
+
+    task run_phase(uvm_phase phase);
+        phase.raise_objection(this);
+        vif.drv_cb.awvalid <= 0; vif.drv_cb.wvalid <= 0;
+        vif.drv_cb.arvalid <= 0; vif.drv_cb.rready <= 0;
+        vif.drv_cb.bready <= 0;
+        vif.drv_cb.awaddr <= 0; vif.drv_cb.wdata <= 0;
+        vif.drv_cb.wstrb <= 0; vif.drv_cb.araddr <= 0;
+        @(posedge vif.aresetn);
+        @(vif.drv_cb);
+        vif.drv_cb.bready <= 1;
+        vif.drv_cb.awaddr <= 32'h20; vif.drv_cb.awvalid <= 1;
+        do @(vif.drv_cb); while (!vif.drv_cb.awready);
+        vif.drv_cb.awvalid <= 0;
+        repeat (6) @(vif.drv_cb);
+        vif.drv_cb.wdata <= 32'h12345678; vif.drv_cb.wstrb <= 15;
+        vif.drv_cb.wvalid <= 1;
+        do @(vif.drv_cb); while (!vif.drv_cb.wready);
+        vif.drv_cb.wvalid <= 0;
+        do @(vif.drv_cb); while (!vif.drv_cb.bvalid);
+        vif.drv_cb.bready <= 0;
+        vif.drv_cb.araddr <= 32'h20; vif.drv_cb.arvalid <= 1;
+        do @(vif.drv_cb); while (!vif.drv_cb.arready);
+        vif.drv_cb.arvalid <= 0;
+        vif.drv_cb.rready <= 1;
+        do @(vif.drv_cb); while (!vif.drv_cb.rvalid);
+        vif.drv_cb.rready <= 0;
+        phase.phase_done.set_drain_time(this, 100ns);
+        phase.drop_objection(this);
+    endtask
+endclass

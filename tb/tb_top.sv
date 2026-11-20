@@ -30,6 +30,11 @@ module tb_top;
         .rready  (intf.rready)
     );
 
+    // Optional debug-only continuous read probes; never drive DUT storage.
+`ifdef AXI4LITE_DEBUG_PROBES
+    `include "axi4lite_debug_probes.svh"
+`endif
+
     // Reset
     initial begin
         aresetn = 0;

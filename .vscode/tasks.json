@@ -1,0 +1,157 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "IC: 运行 Icarus 协议测试",
+      "type": "process",
+      "command": "/bin/bash",
+      "args": [
+        "${workspaceFolder}/scripts/local-dev.sh",
+        "protocol"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": false
+      },
+      "runOptions": {
+        "instanceLimit": 1
+      },
+      "group": "test"
+    },
+    {
+      "label": "IC: 运行 UVM Sanity（复用编译）",
+      "type": "process",
+      "command": "/bin/bash",
+      "args": [
+        "${workspaceFolder}/scripts/local-dev.sh",
+        "sanity"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": false
+      },
+      "runOptions": {
+        "instanceLimit": 1
+      },
+      "group": "test"
+    },
+    {
+      "label": "IC: 运行 UVM Regression（复用编译）",
+      "type": "process",
+      "command": "/bin/bash",
+      "args": [
+        "${workspaceFolder}/scripts/local-dev.sh",
+        "regression"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": false
+      },
+      "runOptions": {
+        "instanceLimit": 1
+      },
+      "group": "test"
+    },
+    {
+      "label": "IC: 运行 UVM RAL（复用编译）",
+      "type": "process",
+      "command": "/bin/bash",
+      "args": [
+        "${workspaceFolder}/scripts/local-dev.sh",
+        "ral"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": false
+      },
+      "runOptions": {
+        "instanceLimit": 1
+      },
+      "group": "test"
+    },
+    {
+      "label": "IC: 打开最近测试日志",
+      "type": "process",
+      "command": "/bin/bash",
+      "args": [
+        "${workspaceFolder}/scripts/local-dev.sh",
+        "log"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": false
+      },
+      "runOptions": {
+        "instanceLimit": 1
+      }
+    },
+    {
+      "label": "IC: 生成真实 AXI4-Lite 波形",
+      "type": "process",
+      "command": "/bin/bash",
+      "args": [
+        "${workspaceFolder}/scripts/local-dev.sh",
+        "wave-generate"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": false
+      },
+      "runOptions": {
+        "instanceLimit": 1
+      },
+      "group": "test"
+    },
+    {
+      "label": "IC: 打开仿真波形（GTKWave）",
+      "type": "process",
+      "command": "/bin/bash",
+      "args": [
+        "${workspaceFolder}/scripts/local-dev.sh",
+        "wave"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": false
+      },
+      "runOptions": {
+        "instanceLimit": 1
+      }
+    }
+  ]
+}
