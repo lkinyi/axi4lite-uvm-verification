@@ -157,3 +157,32 @@ class axi4lite_zero_stall_test extends axi4lite_base_test;
         phase.drop_objection(this);
     endtask
 endclass
+
+// Plan A tests use the unchanged active agent and its existing checking path.
+class axi4lite_decerr_alias_test extends axi4lite_base_test;
+    `uvm_component_utils(axi4lite_decerr_alias_test)
+    int unsigned case_id = 0;
+    function new(string name, uvm_component parent); super.new(name, parent); endfunction
+    task run_phase(uvm_phase phase);
+        axi4lite_decerr_alias_seq seq = axi4lite_decerr_alias_seq::type_id::create("seq");
+        phase.raise_objection(this);
+        seq.case_id = case_id;
+        seq.start(env.agent.sqr);
+        phase.phase_done.set_drain_time(this, 100ns);
+        phase.drop_objection(this);
+    endtask
+endclass
+
+class axi4lite_decerr_top_test extends axi4lite_decerr_alias_test;
+    `uvm_component_utils(axi4lite_decerr_top_test)
+    function new(string name, uvm_component parent);
+        super.new(name, parent); case_id = 1;
+    endfunction
+endclass
+
+class axi4lite_decerr_partial_test extends axi4lite_decerr_alias_test;
+    `uvm_component_utils(axi4lite_decerr_partial_test)
+    function new(string name, uvm_component parent);
+        super.new(name, parent); case_id = 2;
+    endfunction
+endclass

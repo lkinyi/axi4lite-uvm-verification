@@ -137,6 +137,15 @@ module axi4lite_slave #(
                 if (awaddr_q >= VALID_BYTES) begin
                     // Out-of-range write: decode error, memory left untouched.
                     bresp  <= RESP_DECERR;
+`ifdef INJECT_DECERR_ALIAS_BUG
+                    // Deliberate, isolated mutation: corrupt the truncated legal
+                    // alias while still returning DECERR. Honor WSTRB so a
+                    // one-byte OOB write damages only the selected alias byte.
+                    for (b = 0; b < DATA_WIDTH/8; b++) begin
+                        if (wstrb_q[b])
+                            mem[word_index(awaddr_q)][b*8 +: 8] <= wdata_q[b*8 +: 8];
+                    end
+`endif
                 end else begin
 `ifdef INJECT_WSTRB_BUG
                     // -------- DELIBERATE BUG (enable with +define+INJECT_WSTRB_BUG) ------

@@ -182,3 +182,50 @@ class axi4lite_timing_seq extends axi4lite_base_seq;
         end
     endtask
 endclass
+
+// Plan A: initialize a legal word, verify it, attempt its DECERR alias write,
+// then read the legal word again. The existing monitor/scoreboard do all checks.
+class axi4lite_decerr_alias_seq extends axi4lite_base_seq;
+    `uvm_object_utils(axi4lite_decerr_alias_seq)
+    int unsigned case_id = 0;
+    function new(string name="axi4lite_decerr_alias_seq"); super.new(name); endfunction
+
+    task transfer(axi4lite_seq_item::dir_e direction, bit [31:0] address,
+                  bit [31:0] value, bit [3:0] mask);
+        axi4lite_seq_item tr = axi4lite_seq_item::type_id::create("alias_access");
+        start_item(tr);
+        tr.dir = direction; tr.addr = address; tr.data = value; tr.strb = mask;
+        tr.oob = (address >= 32'h400);
+        tr.aw_delay = (case_id == 1) ? 4 : 0;
+        tr.w_delay = (case_id == 2) ? 4 : 0;
+        tr.b_delay = 3; tr.r_delay = 2;
+        finish_item(tr);
+    endtask
+
+    task body();
+        bit [31:0] legal_addr, alias_addr, sentinel, poison;
+        bit [3:0] mask;
+        case (case_id)
+            0: begin
+                legal_addr=32'h20; alias_addr=32'h420;
+                sentinel=32'h13579bdf; poison=32'heca86420; mask=4'hf;
+            end
+            1: begin
+                legal_addr=32'h3fc; alias_addr=32'h7fc;
+                sentinel=32'h2468ace0; poison=32'hfdb97531; mask=4'hf;
+            end
+            2: begin
+                legal_addr=32'h24; alias_addr=32'h424;
+                sentinel=32'ha1b2c3d4; poison=32'h556677ee; mask=4'h1;
+            end
+            default: `uvm_fatal("DECERR_ALIAS", "Unknown Plan A case_id")
+        endcase
+        `uvm_info("DECERR_ALIAS", $sformatf(
+            "legal=0x%08h alias=0x%08h sentinel=0x%08h poison=0x%08h WSTRB=%h",
+            legal_addr, alias_addr, sentinel, poison, mask), UVM_LOW)
+        transfer(axi4lite_seq_item::AXI_WRITE, legal_addr, sentinel, 4'hf);
+        transfer(axi4lite_seq_item::AXI_READ, legal_addr, 0, 0);
+        transfer(axi4lite_seq_item::AXI_WRITE, alias_addr, poison, mask);
+        transfer(axi4lite_seq_item::AXI_READ, legal_addr, 0, 0);
+    endtask
+endclass
