@@ -8,6 +8,7 @@ class axi4lite_monitor extends uvm_monitor;
 
     virtual axi4lite_if vif;
     uvm_analysis_port #(axi4lite_seq_item) ap;
+    bit read_fault_injected = 0;
 
     function new(string name, uvm_component parent);
         super.new(name, parent);
@@ -89,7 +90,32 @@ class axi4lite_monitor extends uvm_monitor;
                 tr.dir = axi4lite_seq_item::AXI_READ;
                 tr.addr = a; tr.data = vif.mon_cb.rdata; tr.strb = 4'h0;
                 tr.resp = vif.mon_cb.rresp;
+                // Each negative experiment is compiled separately. Normal builds
+                // have no mutation. Only the first completed read is affected.
+`ifdef INJECT_MON_DROP_READ
+                if (!read_fault_injected) begin
+                    read_fault_injected = 1;
+                    `uvm_info("MON_INJECT", "INJECT_MON_DROP_READ first completed read", UVM_LOW)
+                    continue;
+                end
+`endif
+`ifdef INJECT_MON_CORRUPT_READ
+                if (!read_fault_injected) begin
+                    read_fault_injected = 1;
+                    tr.data ^= 32'h1;
+                    `uvm_info("MON_INJECT", "INJECT_MON_CORRUPT_READ first read data bit 0", UVM_LOW)
+                end
+`endif
                 ap.write(tr);
+`ifdef INJECT_MON_DUP_READ
+                if (!read_fault_injected) begin
+                    axi4lite_seq_item duplicate = axi4lite_seq_item::type_id::create("duplicate_rd");
+                    read_fault_injected = 1;
+                    duplicate.copy(tr);
+                    `uvm_info("MON_INJECT", "INJECT_MON_DUP_READ first completed read", UVM_LOW)
+                    ap.write(duplicate);
+                end
+`endif
             end
         end
     endtask

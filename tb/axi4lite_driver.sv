@@ -6,9 +6,11 @@ class axi4lite_driver extends uvm_driver #(axi4lite_seq_item);
     `uvm_component_utils(axi4lite_driver)
 
     virtual axi4lite_if vif;
+    uvm_analysis_port #(axi4lite_seq_item) completed_ap;
 
     function new(string name, uvm_component parent);
         super.new(name, parent);
+        completed_ap = new("completed_ap", this);
     endfunction
 
     function void build_phase(uvm_phase phase);
@@ -27,6 +29,7 @@ class axi4lite_driver extends uvm_driver #(axi4lite_seq_item);
             seq_item_port.get_next_item(tr);
             if (tr.dir == axi4lite_seq_item::AXI_WRITE) drive_write(tr);
             else                                        drive_read(tr);
+            publish_completed(tr);
             seq_item_port.item_done();
         end
     endtask
@@ -68,9 +71,11 @@ class axi4lite_driver extends uvm_driver #(axi4lite_seq_item);
         join
         do @(vif.drv_cb); while(!vif.drv_cb.bvalid);
         repeat(tr.b_delay) @(vif.drv_cb);
-        tr.resp = vif.drv_cb.bresp;
         vif.drv_cb.bready <= 1;
-        @(vif.drv_cb);
+        // Both clocking blocks sample #1step. Confirm the actual B handshake,
+        // not merely BVALID or the scheduling of BREADY.
+        do @(vif.drv_cb); while (!(vif.mon_cb.bvalid && vif.mon_cb.bready));
+        tr.resp = vif.drv_cb.bresp;
         vif.drv_cb.bready <= 0;
     endtask
 
@@ -88,11 +93,18 @@ class axi4lite_driver extends uvm_driver #(axi4lite_seq_item);
         do @(vif.drv_cb); while (!vif.drv_cb.rvalid);
         repeat(tr.r_delay) @(vif.drv_cb);
         vif.drv_cb.rready <= 1;
-        tr.data = vif.drv_cb.rdata;     // result returned to the sequence
+        do @(vif.drv_cb); while (!(vif.mon_cb.rvalid && vif.mon_cb.rready));
+        tr.data = vif.drv_cb.rdata;     // result from the accepted R beat
         tr.resp = vif.drv_cb.rresp;
-        @(vif.drv_cb);
         vif.drv_cb.rready <= 1'b0;
     endtask
+
+    // Publish before item_done permits sequence reuse; never expose its handle.
+    function void publish_completed(axi4lite_seq_item tr);
+        axi4lite_seq_item completed = axi4lite_seq_item::type_id::create("completed");
+        completed.copy(tr);
+        completed_ap.write(completed);
+    endfunction
 
 endclass
 

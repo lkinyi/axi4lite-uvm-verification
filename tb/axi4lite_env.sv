@@ -8,6 +8,7 @@ class axi4lite_env extends uvm_env;
     axi4lite_agent      agent;
     axi4lite_scoreboard sb;
     axi4lite_coverage   cov;
+    axi4lite_integrity_checker integrity;
 
     function new(string name, uvm_component parent);
         super.new(name, parent);
@@ -18,12 +19,18 @@ class axi4lite_env extends uvm_env;
         agent = axi4lite_agent::type_id::create("agent", this);
         sb    = axi4lite_scoreboard::type_id::create("sb", this);
         cov   = axi4lite_coverage::type_id::create("cov", this);
+        integrity = axi4lite_integrity_checker::type_id::create("integrity", this);
     endfunction
 
     function void connect_phase(uvm_phase phase);
         // Monitor broadcasts to both the scoreboard and the coverage collector
         agent.mon.ap.connect(sb.imp);
         agent.mon.ap.connect(cov.analysis_export);
+        agent.mon.ap.connect(integrity.monitor_imp);
+        integrity.sb = sb;
+        integrity.active_check = (agent.get_is_active() == UVM_ACTIVE);
+        if (integrity.active_check)
+            agent.drv.completed_ap.connect(integrity.driver_imp);
     endfunction
 
 endclass
